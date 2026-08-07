@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-//Hiperparametros
+// Hiperparametros
 #define NUM_DE_GERACOES 5000
 #define TAM_POPULACAO 100
 #define TAXA_CRUZAMENTO 0.1
@@ -9,13 +9,24 @@
 
 using namespace std;
 
-void mutarPopulacao();
+class AlgoritmoGenetico
+{
+public:
+    void mutarCromossomo();
 
-void cruzarPopulacao();
+    void mutarPopulacao();
 
-void calcularFitnessCromossomo();
+    void cruzarCromossomos();
 
+    void cruzarPopulacao();
 
-int main(){
+    void calcularFitnessCromossomo();
 
-}
+private:
+    struct cromossomo
+    {
+        double velocidade_media_retas; //placeholder
+        double fitness;
+    };
+    vector<cromossomo>populacao;
+};
