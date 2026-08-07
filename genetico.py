@@ -20,4 +20,4 @@ class AlgoritmoGenetico:
     pass
     
     def iniciarPopulacao(self):
-        
+        pass
