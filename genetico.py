@@ -1,6 +1,7 @@
 import numpy
 import fitnessMonza
 import random
+import copy
 
 class Cromossomo:
     def __init__(self, mass : float, potencia : float, cd : float, cl : float, A : float, mu : float, crr : float) -> None:
@@ -15,6 +16,20 @@ class Cromossomo:
         
     def setFitness(self, fitness):
         self.fitness = fitness
+
+    def __repr__(self):
+        return (
+            f"Cromossomo("
+            f"mass={self.mass:.2f}, "
+            f"potencia={self.potencia:.2f}, "
+            f"cd={self.cd:.4f}, "
+            f"cl={self.cl:.4f}, "
+            f"A={self.A:.4f}, "
+            f"mu={self.mu:.4f}, "
+            f"crr={self.crr:.5f}, "
+            f"fitness={self.fitness:.4f}"
+            f")\n"
+        )
         
         
 class AlgoritmoGenetico:
@@ -159,11 +174,73 @@ class AlgoritmoGenetico:
             self.mutarCromossomo(self.populacao[idx]) #mesmo cromossomo pode ser mutado 2x
         pass
     
-    def cruzarPopulacao(self):
-        pass
+    def cruzarPopulacao(self, populacao : list[Cromossomo], taxa_cruzamento : float, tam_populacao : int):
+        quantidade_cruzamento = int(tam_populacao * taxa_cruzamento)
+
+        genes = [
+            "mass",
+            "potencia",
+            "cd",
+            "cl",
+            "A",
+            "mu",
+            "crr"
+        ]        
+
+        for i in range (quantidade_cruzamento):
+            gene_cruzado = random.randint(1, 7)
+            idx_cromossomo1 = random.randint(0, tam_populacao-1)
+
+            while True:
+                idx_cromossomo2 = random.randint(0, tam_populacao-1)
+                if idx_cromossomo1 != idx_cromossomo2:
+                    break
+
+            cromossomo1 = populacao[idx_cromossomo1]
+            cromossomo2 = populacao[idx_cromossomo2]
+
+            cromossomo_cruzado1 = copy.deepcopy(cromossomo1)
+            cromossomo_cruzado2 = copy.deepcopy(cromossomo2)
+
+            gene_cruzado = random.choice(genes)
+
+            valor1 = getattr(cromossomo_cruzado1, gene_cruzado)
+            valor2 = getattr(cromossomo_cruzado2, gene_cruzado)
+
+            setattr(cromossomo_cruzado1, gene_cruzado, valor2)
+            setattr(cromossomo_cruzado2, gene_cruzado, valor1)
+
+            self.calcularFitnessIndividuo(
+                cromossomo_cruzado1,
+                cromossomo_cruzado1.mass,
+                cromossomo_cruzado1.potencia,
+                cromossomo_cruzado1.cd,
+                cromossomo_cruzado1.cl,
+                cromossomo_cruzado1.A,
+                cromossomo_cruzado1.mu,
+                cromossomo_cruzado1.crr
+            )
+            self.calcularFitnessIndividuo(
+                cromossomo_cruzado2,
+                cromossomo_cruzado2.mass,
+                cromossomo_cruzado2.potencia,
+                cromossomo_cruzado2.cd,
+                cromossomo_cruzado2.cl,
+                cromossomo_cruzado2.A,
+                cromossomo_cruzado2.mu,
+                cromossomo_cruzado2.crr
+            )
+            populacao.append(cromossomo_cruzado1)
+            populacao.append(cromossomo_cruzado2)
+
+        return populacao
+        
+
     
-    def selecionarPopulacao(self):
-        pass
+    def selecionarPopulacao(self, populacao : list[Cromossomo], tam_populacao : int):
+        populacao.sort(key=lambda cromossomo: cromossomo.fitness)
+        populacao[:] = populacao[:tam_populacao]
+        return populacao
     
     def calcularFitnessIndividuo(self, cromossomo,  massa, potencia, cd, cl, A, mu, crr):
         fitness = fitnessMonza.lap_time_simulator(massa, potencia, cd, cl, A, mu, crr) #tempo teorico do carro em uma volta de monza
@@ -174,4 +251,14 @@ class AlgoritmoGenetico:
         pass
 
 alg = AlgoritmoGenetico(0,0,0,0,0)
-alg.geraCromossomoAleatorio()
+tam_populacao = 100
+geracoes = 5
+populacao = []
+for i in range(tam_populacao):
+    populacao.append(alg.geraCromossomoAleatorio())
+
+for i in range(geracoes):
+    populacao = alg.cruzarPopulacao(populacao=populacao, taxa_cruzamento=0.2, tam_populacao=tam_populacao)
+    populacao = alg.selecionarPopulacao(populacao=populacao, tam_populacao=tam_populacao)
+    print(f"==================POPULACAO: GERACAO {i}=====================")
+    print(populacao)
