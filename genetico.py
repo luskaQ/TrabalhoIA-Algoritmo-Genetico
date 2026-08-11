@@ -170,12 +170,12 @@ class AlgoritmoGenetico:
     def mutarPopulacao(self):
         num_mutacoes = int(self.tam_populacao * self.taxa_mutacao)
         for i in range(num_mutacoes):
-            idx = random.randint(0, self.tam_populacao - 1)
+            idx = random.randint(0, len(self.populacao) - 1)
             self.mutarCromossomo(self.populacao[idx]) #mesmo cromossomo pode ser mutado 2x
         pass
     
-    def cruzarPopulacao(self, populacao : list[Cromossomo], taxa_cruzamento : float, tam_populacao : int):
-        quantidade_cruzamento = int(tam_populacao * taxa_cruzamento)
+    def cruzarPopulacao(self):
+        quantidade_cruzamento = int(self.tam_populacao * self.taxa_cruzamento)
 
         genes = [
             "mass",
@@ -189,15 +189,15 @@ class AlgoritmoGenetico:
 
         for i in range (quantidade_cruzamento):
             gene_cruzado = random.randint(1, 7)
-            idx_cromossomo1 = random.randint(0, tam_populacao-1)
+            idx_cromossomo1 = random.randint(0, self.tam_populacao-1)
 
             while True:
-                idx_cromossomo2 = random.randint(0, tam_populacao-1)
+                idx_cromossomo2 = random.randint(0, self.tam_populacao-1)
                 if idx_cromossomo1 != idx_cromossomo2:
                     break
 
-            cromossomo1 = populacao[idx_cromossomo1]
-            cromossomo2 = populacao[idx_cromossomo2]
+            cromossomo1 = self.populacao[idx_cromossomo1]
+            cromossomo2 = self.populacao[idx_cromossomo2]
 
             cromossomo_cruzado1 = copy.deepcopy(cromossomo1)
             cromossomo_cruzado2 = copy.deepcopy(cromossomo2)
@@ -230,35 +230,32 @@ class AlgoritmoGenetico:
                 cromossomo_cruzado2.mu,
                 cromossomo_cruzado2.crr
             )
-            populacao.append(cromossomo_cruzado1)
-            populacao.append(cromossomo_cruzado2)
-
-        return populacao
+            self.populacao.append(cromossomo_cruzado1)
+            self.populacao.append(cromossomo_cruzado2)
         
 
     
-    def selecionarPopulacao(self, populacao : list[Cromossomo], tam_populacao : int):
-        populacao.sort(key=lambda cromossomo: cromossomo.fitness)
-        populacao[:] = populacao[:tam_populacao]
-        return populacao
+    def selecionarPopulacao(self):
+        self.populacao.sort(key=lambda cromossomo: cromossomo.fitness)
+        self.populacao[:] = self.populacao[:self.tam_populacao]
     
     def calcularFitnessIndividuo(self, cromossomo,  massa, potencia, cd, cl, A, mu, crr):
         fitness = fitnessMonza.lap_time_simulator(massa, potencia, cd, cl, A, mu, crr) #tempo teorico do carro em uma volta de monza
         cromossomo.setFitness(fitness)
         pass
     
-    def calcularFitnessPopulação(self):
-        pass
+    def execAlg(self):
+        self.iniciarPopulacao()
+        self.selecionarPopulacao()
+        for i in range(self.num_geracoes):
+            #print(i)
+            self.cruzarPopulacao()
+            self.mutarPopulacao()
+            self.selecionarPopulacao()
+            print(self.populacao[0])
+            print(self.populacao[self.tam_populacao//2])
+            print(self.populacao[self.tam_populacao - 1])
+            print("-"*40)
 
-alg = AlgoritmoGenetico(0,0,0,0,0)
-tam_populacao = 100
-geracoes = 5
-populacao = []
-for i in range(tam_populacao):
-    populacao.append(alg.geraCromossomoAleatorio())
-
-for i in range(geracoes):
-    populacao = alg.cruzarPopulacao(populacao=populacao, taxa_cruzamento=0.2, tam_populacao=tam_populacao)
-    populacao = alg.selecionarPopulacao(populacao=populacao, tam_populacao=tam_populacao)
-    print(f"==================POPULACAO: GERACAO {i}=====================")
-    print(populacao)
+alg = AlgoritmoGenetico(200, 0.05, 0.01, 0.05, 100)
+alg.execAlg()
