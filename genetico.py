@@ -2,6 +2,8 @@ import numpy
 import fitnessMonza
 import random
 import copy
+import json
+import matplotlib.pyplot as plt
 
 class Cromossomo:
     def __init__(self, mass : float, potencia : float, cd : float, cl : float, A : float, mu : float, crr : float) -> None:
@@ -78,8 +80,16 @@ class AlgoritmoGenetico:
         pass
         
     def mutarCromossomo(self, cromossomo: Cromossomo):
-        gene_mutado = random.randint(1, 7)
-
+        #tipo_mutacao = random.randint(1,2)
+        gene_mutado = random.randint(1, 6)
+        delta = random.uniform(
+            -self.magnitude_mutacao * abs(cromossomo.A),
+            self.magnitude_mutacao * abs(cromossomo.A)    
+        )
+        cromossomo.A = self.limitarGene(                cromossomo.A + delta,
+            1.4,
+            1.6
+        )
         if gene_mutado == 1:
             delta = random.uniform(
                 -self.magnitude_mutacao * abs(cromossomo.mass),
@@ -126,17 +136,6 @@ class AlgoritmoGenetico:
 
         elif gene_mutado == 5:
             delta = random.uniform(
-                -self.magnitude_mutacao * abs(cromossomo.A),
-                self.magnitude_mutacao * abs(cromossomo.A)
-            )
-            cromossomo.A = self.limitarGene(
-                cromossomo.A + delta,
-                1.4,
-                1.6
-            )
-
-        elif gene_mutado == 6:
-            delta = random.uniform(
                 -self.magnitude_mutacao * abs(cromossomo.mu),
                 self.magnitude_mutacao * abs(cromossomo.mu)
             )
@@ -145,8 +144,7 @@ class AlgoritmoGenetico:
                 1.5,
                 1.8
             )
-
-        elif gene_mutado == 7:
+        elif gene_mutado == 6:
             delta = random.uniform(
                 -self.magnitude_mutacao * abs(cromossomo.crr),
                 self.magnitude_mutacao * abs(cromossomo.crr)
@@ -156,6 +154,8 @@ class AlgoritmoGenetico:
                 0.015,
                 0.025
             )
+
+
         self.calcularFitnessIndividuo(
             cromossomo,
             cromossomo.mass,
@@ -170,7 +170,7 @@ class AlgoritmoGenetico:
     def mutarPopulacao(self):
         num_mutacoes = int(self.tam_populacao * self.taxa_mutacao)
         for i in range(num_mutacoes):
-            idx = random.randint(0, len(self.populacao) - 1)
+            idx = random.randint(1, len(self.populacao) - 1)
             self.mutarCromossomo(self.populacao[idx]) #mesmo cromossomo pode ser mutado 2x
         pass
     
@@ -245,6 +245,7 @@ class AlgoritmoGenetico:
         pass
     
     def execAlg(self):
+        fitness = []
         self.iniciarPopulacao()
         self.selecionarPopulacao()
         for i in range(self.num_geracoes):
@@ -252,10 +253,64 @@ class AlgoritmoGenetico:
             self.cruzarPopulacao()
             self.mutarPopulacao()
             self.selecionarPopulacao()
+            fitness.append((self.populacao[0].fitness, self.populacao[self.tam_populacao//2].fitness, self.populacao[self.tam_populacao - 1].fitness))
+            print(f"Geração {i}", '-'*40)
             print(self.populacao[0])
             print(self.populacao[self.tam_populacao//2])
             print(self.populacao[self.tam_populacao - 1])
-            print("-"*40)
+        return fitness
 
-alg = AlgoritmoGenetico(200, 0.05, 0.01, 0.05, 100)
-alg.execAlg()
+num_geracoes = 50
+taxa_cruzamento = 0.3
+taxa_mutacao = 0.3
+magnitude_mutacao = 0.99
+tam_populacao = 100
+
+alg = AlgoritmoGenetico(
+                        num_geracoes=num_geracoes,
+                        taxa_cruzamento=taxa_cruzamento,
+                        taxa_mutacao=taxa_mutacao,
+                        magnitude_mutacao=magnitude_mutacao,
+                        tam_populacao=tam_populacao
+                    )
+meus_fitness = alg.execAlg()
+
+dicionario = {
+    "numero_geracoes_max":num_geracoes,
+    "num_epocas_rodadas_realmente":len(meus_fitness),
+    "taxa_cruzamento":taxa_cruzamento,
+    "taxa_mutacao":taxa_mutacao,
+    "magnitude_mutacao":magnitude_mutacao,
+    "tam_populacao":tam_populacao,
+    "fitness_do_melhor_ultima_geracao":meus_fitness[len(meus_fitness)-1][0]
+}
+
+arquivo = "resultados.json"
+
+try:
+    with open(arquivo, "r", encoding="utf-8") as f:
+        dados = json.load(f)
+except (FileNotFoundError, json.JSONDecodeError):
+    dados = []
+
+dados.append(dicionario)
+
+with open(arquivo, "w", encoding="utf-8") as f:
+    json.dump(dados, f, indent=4, ensure_ascii=False)
+    
+geracoes = range(1, len(meus_fitness) + 1)
+
+melhores = [fitness[0] for fitness in meus_fitness]
+medianos = [fitness[1] for fitness in meus_fitness]
+piores = [fitness[2] for fitness in meus_fitness]
+
+plt.plot(geracoes, melhores, label="Melhor")
+plt.plot(geracoes, medianos, label="Mediano")
+plt.plot(geracoes, piores, label="Pior")
+
+plt.xlabel("Geração")
+plt.ylabel("Fitness")
+plt.title("Evolução do Fitness por Geração")
+plt.legend()
+plt.grid(True)
+plt.savefig("img1.png")

@@ -1,0 +1,47 @@
+[
+    {
+        "numero_geracoes_max": 50,
+        "num_epocas_rodadas_realmente": 50,
+        "taxa_cruzamento": 0.3,
+        "taxa_mutacao": 0.1,
+        "magnitude_mutacao": 0.99,
+        "tam_populacao": 100,
+        "fitness_do_melhor_ultima_geracao": 64.58683080231789
+    },
+    {
+        "numero_geracoes_max": 50,
+        "num_epocas_rodadas_realmente": 50,
+        "taxa_cruzamento": 0.3,
+        "taxa_mutacao": 0.9,
+        "magnitude_mutacao": 0.99,
+        "tam_populacao": 100,
+        "fitness_do_melhor_ultima_geracao": 64.5869632481497
+    },
+    {
+        "numero_geracoes_max": 50,
+        "num_epocas_rodadas_realmente": 50,
+        "taxa_cruzamento": 0.3,
+        "taxa_mutacao": 0.3,
+        "magnitude_mutacao": 0.99,
+        "tam_populacao": 100,
+        "fitness_do_melhor_ultima_geracao": 64.58621038193286
+    },
+    {
+        "numero_geracoes_max": 50,
+        "num_epocas_rodadas_realmente": 50,
+        "taxa_cruzamento": 0.3,
+        "taxa_mutacao": 0.3,
+        "magnitude_mutacao": 0.99,
+        "tam_populacao": 100,
+        "fitness_do_melhor_ultima_geracao": 64.5864164081693
+    },
+    {
+        "numero_geracoes_max": 50,
+        "num_epocas_rodadas_realmente": 50,
+        "taxa_cruzamento": 0.3,
+        "taxa_mutacao": 0.3,
+        "magnitude_mutacao": 0.99,
+        "tam_populacao": 100,
+        "fitness_do_melhor_ultima_geracao": 64.59950632432016
+    }
+]
